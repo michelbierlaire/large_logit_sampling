@@ -1,0 +1,552 @@
+\documentclass[11pt]{article}
+
+\usepackage{amsmath,amssymb,amsthm}
+\usepackage{geometry}
+\geometry{margin=1in}
+
+\title{Sampling from Very Large Choice Sets using Accept-Reject and Structured Search}
+\author{Anne Valérie Preto \and Michel Bierlaire}
+\date{\today}
+
+\newtheorem{proposition}{Proposition}
+
+\begin{document}
+
+\maketitle
+
+\section{Introduction}
+
+Sampling from discrete choice models with very large choice sets is a fundamental problem in transportation and behavioral modeling. In many applications, the set of feasible alternatives cannot be explicitly enumerated.
+
+For instance, in route choice, the number of feasible paths between an origin and a destination can grow exponentially with the size of the network.
+
+The logit model defines:
+\[
+P(i) = \frac{\exp(V_i)}{\sum_{j \in \mathcal{C}} \exp(V_j)},
+\]
+where the scale parameter $\mu$ has been normalized to 1.
+The denominator becomes intractable when $\mathcal{C}$ is large.
+
+The objective of this work is to construct a method that:
+\begin{itemize}
+\item produces independent samples,
+\item avoids explicit enumeration of $\mathcal{C}$,
+\item does not require computing the normalization constant.
+\end{itemize}
+
+\section{Problem formulation}
+
+Let $\mathcal{C}$ be a finite, possibly very large, choice set. We consider a probability distribution on $\mathcal{C}$ of the form
+\[
+p(i) = \frac{g(i)}{Z}, \qquad i \in \mathcal{C},
+\]
+where
+\[
+Z = \sum_{j \in \mathcal{C}} g(j)
+\]
+is the normalizing constant, and where the function $g(i)$ is assumed to be easy to evaluate for any given alternative $i$.
+
+The difficulty is that, although $g(i)$ can be computed pointwise, the normalizing constant $Z$ cannot be obtained in practice when $\mathcal{C}$ is too large to enumerate.
+
+The objective is therefore to sample from $p(i)$ without enumerating $\mathcal{C}$ and without computing $Z$.
+
+\paragraph{Example: multinomial logit.}
+The multinomial logit model is a particular case obtained by setting
+\[
+g(i) = \exp(V_i),
+\]
+where $V_i$ is the systematic utility of alternative $i$. In that case,
+\[
+p(i) = \frac{\exp(V_i)}{\sum_{j \in \mathcal{C}} \exp(V_j)}.
+\]
+The methodology developed below, however, applies more generally to any model for which the numerator $g(i)$ can be evaluated directly.
+
+\section{Structured representation of the choice set}
+
+The choice set is represented implicitly using a collection of \emph{states}.
+
+\subsection{States}
+
+A state $s$ represents a subset $\mathcal{C}(s) \subseteq \mathcal{C}$. A state is \emph{complete} if it corresponds to a single alternative.
+
+States are organized in a tree structure. There exists a root state $s_0$ such that:
+\[
+\mathcal{C}(s_0) = \mathcal{C}.
+\]
+
+Each non-complete state can be expanded into disjoint child states:
+\[
+\mathcal{C}(s) = \bigcup_{s' \in \text{Children}(s)} \mathcal{C}(s').
+\]
+
+\subsection{Search and decomposition}
+
+A search procedure explores this tree and produces a decomposition:
+\[
+\mathcal{C} = G \cup R,
+\]
+where:
+\begin{itemize}
+\item $G$ is a finite set of complete alternatives,
+\item $R$ is represented implicitly as
+\[
+R = \bigcup_{s \in \mathcal{S}_R} \mathcal{C}(s),
+\]
+with $\mathcal{S}_R$ a set of unexplored states.
+\end{itemize}
+
+\subsection{State-dependent bounds}
+
+Each state $s$ is associated with a bound:
+\[
+U(s) \ge \max_{i \in \mathcal{C}(s)} V_i.
+\]
+
+These bounds summarize the best possible utility within each region and will be used to control the sampling procedure.
+
+\paragraph{Route choice example.}
+A state corresponds to a partial path. The set $\mathcal{C}(s)$ contains all feasible completions of that path. The bound $U(s)$ can be obtained by combining the accumulated utility with an upper bound on the remaining part.
+
+\section{Accept-reject sampling}
+
+Let $q(i)$ be a proposal distribution and $c_u$ a constant such that:
+\[
+\frac{g(i)}{q(i)} \le c_u \quad \forall i.
+\]
+
+The accept-reject algorithm draws $i \sim q$ and accepts it with probability:
+\[
+\frac{g(i)}{c_u q(i)}.
+\]
+
+\begin{proposition}
+The distribution of an accepted draw is $p(i)$.
+\end{proposition}
+
+\begin{proof}
+Let $I$ denote the alternative proposed from $q$, and let $A$ denote the event that the proposal is accepted.
+
+By construction,
+\[
+\mathbb{P}(A \mid I=i)=\frac{g(i)}{c_u q(i)}.
+\]
+Therefore,
+\[
+\mathbb{P}(I=i, A)
+=
+\mathbb{P}(I=i)\,\mathbb{P}(A \mid I=i)
+=
+q(i)\,\frac{g(i)}{c_u q(i)}
+=
+\frac{g(i)}{c_u}.
+\]
+
+Summing over all $i \in \mathcal{C}$, we obtain
+\[
+\mathbb{P}(A)
+=
+\sum_{j \in \mathcal{C}} \mathbb{P}(I=j, A)
+=
+\sum_{j \in \mathcal{C}} \frac{g(j)}{c_u}
+=
+\frac{Z}{c_u}.
+\]
+
+Hence, for any $i \in \mathcal{C}$,
+\[
+\mathbb{P}(I=i \mid A)
+=
+\frac{\mathbb{P}(I=i, A)}{\mathbb{P}(A)}
+=
+\frac{g(i)/c_u}{Z/c_u}
+=
+\frac{g(i)}{Z}
+=
+p(i).
+\]
+
+Therefore, the distribution of an accepted draw is $p(i)$.
+\end{proof}
+
+\section{Proposal construction}
+
+The construction of the proposal distribution is based on the decomposition of the choice set introduced in the search phase:
+\[
+\mathcal{C} = G \cup R,
+\]
+where:
+\begin{itemize}
+\item $G$ is a finite set of fully specified alternatives identified during the search procedure,
+\item $R$ is the remainder of the choice set, represented implicitly through a collection of states.
+\end{itemize}
+
+\subsection{Elite and tail components}
+
+The set $G$ is referred to as the \emph{elite set}. It contains alternatives that have been explicitly constructed and evaluated. Since $G$ is finite, it can be handled exactly.
+
+The set $R$ is referred to as the \emph{tail}. It contains all alternatives that have not been explicitly enumerated and is represented implicitly through the state decomposition:
+\[
+R = \bigcup_{s \in \mathcal{S}_R} \mathcal{C}(s).
+\]
+
+The proposal distribution is constructed as a mixture of two components:
+\begin{itemize}
+\item an \emph{elite proposal} supported on $G$,
+\item a \emph{tail proposal} supported on $R$.
+\end{itemize}
+
+\subsection{Elite proposal}
+
+The elite proposal is defined using the exact weights of the alternatives in $G$:
+\[
+q_G(i) = \frac{g(i)}{Z_G}, \qquad Z_G = \sum_{j \in G} g(j).
+\]
+
+This defines a valid probability distribution on $G$.
+
+\subsection{Tail proposal}
+
+The tail proposal $q_R$ is defined on $R$ using the state representation. Its construction relies on an explicit generative mechanism.
+
+\paragraph{State selection.}
+Let $\pi$ be a probability distribution on the set of states $\mathcal{S}_R$, such that:
+\[
+\pi(s) > 0 \quad \forall s \in \mathcal{S}_R, 
+\qquad \sum_{s \in \mathcal{S}_R} \pi(s) = 1.
+\]
+
+\paragraph{Completion mechanism.}
+For each state $s$, we define a \emph{stochastic completion procedure} that constructs a complete alternative $i \in \mathcal{C}(s)$ through a sequence of elementary random decisions.
+
+Starting from state $s$, the procedure repeatedly extends the current partial alternative by selecting a feasible extension according to a probability rule that depends only on the current state. This process continues until a complete alternative is obtained.
+
+This sequential construction induces a probability distribution on $\mathcal{C}(s)$, denoted by $q_s(i)$. For any $i \in \mathcal{C}(s)$, $q_s(i)$ is given by the product of the conditional probabilities of the successive choices that lead to $i$:
+\[
+q_s(i) = \prod_{t} p(a_t \mid \text{current partial alternative at step } t).
+\]
+
+Importantly, $q_s$ is defined through this generative mechanism and does not require normalization over the full set $\mathcal{C}(s)$.
+
+\paragraph{Tail proposal.}
+The overall tail proposal is obtained by combining state selection and completion:
+\[
+q_R(i) = \pi(s)\, q_s(i), \quad \text{for } i \in \mathcal{C}(s).
+\]
+
+\paragraph{Remark.}
+This construction ensures that $q_R$ is a well-defined probability distribution on $R$, provided that:
+\begin{itemize}
+\item for each state $s$, the completion procedure defines a valid probability distribution over $\mathcal{C}(s)$ through its sequential construction,
+\item the sets $\mathcal{C}(s)$ are disjoint for $s \in \mathcal{S}_R$.
+\end{itemize}
+
+\subsection{Mixture proposal}
+
+The overall proposal distribution is defined as a mixture of the two components:
+\[
+q(i) =
+\begin{cases}
+\alpha q_G(i), & i \in G, \\
+(1-\alpha) q_R(i), & i \in R,
+\end{cases}
+\]
+where $\alpha \in (0,1)$ is a mixing parameter.
+
+By construction, $q$ is a valid probability distribution on $\mathcal{C}$.
+
+\section{Bound construction}
+
+To apply accept-reject, we need a bound on $\frac{g(i)}{q(i)}$.
+
+\subsection{Elite part}
+
+For $i \in G$:
+\[
+\frac{g(i)}{q(i)} = \frac{Z_G}{\alpha}.
+\]
+
+\subsection{Tail part}
+
+Define:
+\[
+B_R = \sup_{i \in R} \frac{g(i)}{q_R(i)}.
+\]
+
+Since $R$ is not explicitly known, we construct a computable bound $\widetilde{B}_R$.
+
+\subsection{State-wise bound}
+
+For each state $s$, let $q_s(i)$ denote the conditional probability of generating $i \in \mathcal{C}(s)$.
+
+Assume the existence of a computable lower bound:
+\[
+q_s(i) \ge \underline{q}_s(i) > 0.
+\]
+
+Since $q_R(i) = \pi(s) q_s(i)$, we obtain:
+\[
+q_R(i) \ge \pi(s)\,\underline{q}_s(i).
+\]
+
+Combining with $g(i) \le e^{U(s)}$, we obtain:
+\[
+\frac{g(i)}{q_R(i)}
+\le
+\frac{e^{U(s)}}{\pi(s)\,\underline{q}_s(i)}.
+\]
+
+Define:
+\[
+\widetilde{B}_R =
+\max_{s \in \mathcal{S}_R}
+\sup_{i \in \mathcal{C}(s)}
+\frac{e^{U(s)}}{\pi(s)\,\underline{q}_s(i)}.
+\]
+
+\begin{proposition}
+$\widetilde{B}_R$ is a valid upper bound.
+\end{proposition}
+
+\begin{proof}
+For any $i \in R$, there exists $s$ such that $i \in \mathcal{C}(s)$, and the inequality follows.
+\end{proof}
+
+\subsection{Global bound}
+The ratio $\frac{g(i)}{q(i)}$ is bounded separately on $G$ and $R$. A valid global bound is therefore obtained by taking the maximum of the two corresponding bounds:
+\[
+c_u =
+\max \left\{
+\frac{Z_G}{\alpha},
+\frac{\widetilde{B}_R}{1-\alpha}
+\right\}.
+\]
+
+\section{Optimal mixing}
+
+The efficiency of the accept-reject algorithm depends on the magnitude of $c_u$, which directly controls the acceptance probability. The parameter $\alpha$ determines how probability mass is allocated between the elite set $G$ and the tail $R$, and therefore affects both terms in the bound.
+
+To obtain the most efficient proposal, we choose $\alpha$ so as to minimize $c_u$. Since $c_u$ is the maximum of two terms, it is minimized when the two terms are equal:
+\[
+\frac{Z_G}{\alpha} = \frac{\widetilde{B}_R}{1-\alpha}.
+\]
+
+Solving for $\alpha$ yields:
+\[
+\alpha^* = \frac{Z_G}{Z_G + \widetilde{B}_R}.
+\]
+
+At this value, the contributions of the elite and tail components to the bound are balanced, leading to the smallest possible value of $c_u$.
+
+\section{Specialization to path sampling}
+
+Paths are generated sequentially. Let $d(n)$ be the number of outgoing links at node $n$.
+
+The conditional probability of a path is:
+\[
+q_s(i) = \prod_{t} p(a_{t+1} \mid n_t).
+\]
+
+Since $p(a \mid n) \ge 1/d(n)$, define:
+\[
+\underline{q}_s(i) = \prod_t \frac{1}{d(n_t)}.
+\]
+
+Then:
+\[
+q_R(i) \ge \pi(s)\,\underline{q}_s(i),
+\]
+and:
+\[
+\frac{g(i)}{q_R(i)}
+\le
+\frac{e^{U(s)}}{\pi(s)}
+\prod_t d(n_t).
+\]
+
+\section{Algorithm}
+
+The procedure consists of two phases: a \emph{construction phase}, where the proposal and its bound are defined, and a \emph{sampling phase}, where independent draws are generated.
+
+\paragraph{Construction phase.}
+\begin{enumerate}
+\item Explore the state space using a search procedure and construct a finite set $G$ of complete alternatives. The remaining alternatives are represented implicitly through a set of states $\mathcal{S}_R$.
+\item Define a tail proposal $q_R$ by specifying:
+\begin{itemize}
+\item a distribution $\pi$ over the states in $\mathcal{S}_R$,
+\item a completion procedure that induces $q_s(i)$ for each state $s$.
+\end{itemize}
+\item Compute a computable upper bound $\widetilde{B}_R$ using the state-dependent bounds.
+\item Define the mixture proposal $q$ using the elite component on $G$, the tail component on $R$, and the mixing weight $\alpha$.
+\end{enumerate}
+
+\paragraph{Sampling phase.}
+\begin{enumerate}
+\item Draw a candidate $i \sim q$.
+\item Accept $i$ with probability $\frac{g(i)}{c_u q(i)}$. If rejected, repeat.
+\end{enumerate}
+\section{Correctness}
+
+\begin{proposition}
+The method generates independent samples from $p(i)$.
+\end{proposition}
+
+\begin{proof}
+Each accepted sample is obtained independently via accept-reject.
+\end{proof}
+
+\section{Adaptive refinement of the tail partition}
+
+The construction described above relies on a fixed decomposition of the tail:
+\[
+R = \bigcup_{s \in \mathcal{S}_R} \mathcal{C}(s),
+\]
+together with state-dependent bounds $U(s)$. The efficiency of the accept-reject procedure depends on how well this decomposition captures the variability of the function $g(i)$ over the choice set.
+
+This section describes how rejected samples can be used to refine the partition of $R$ and improve the bound.
+
+\subsection{Information revealed by rejection}
+
+Consider a candidate $i \sim q$ that is rejected. Suppose that $i \in \mathcal{C}(s)$ for some state $s \in \mathcal{S}_R$. Since the acceptance probability is:
+\[
+\frac{g(i)}{c_u q(i)},
+\]
+a rejection indicates that $g(i)$ is small relative to the bound used in region $\mathcal{C}(s)$.
+
+More precisely, the bound $U(s)$ reflects the maximum possible utility in $\mathcal{C}(s)$, whereas the sampled alternative $i$ may correspond to a much lower value. This reveals that the region $\mathcal{C}(s)$ is heterogeneous and that the current partition is too coarse.
+
+\subsection{Refinement of the partition}
+
+Refining the partition consists in replacing a state $s$ by its children:
+\[
+\mathcal{C}(s) = \bigcup_{s' \in \text{Children}(s)} \mathcal{C}(s'),
+\]
+and updating:
+\[
+\mathcal{S}_R \leftarrow (\mathcal{S}_R \setminus \{s\}) \cup \text{Children}(s).
+\]
+
+Each new state $s'$ is associated with a bound $U(s')$ such that:
+\[
+U(s') \le U(s).
+\]
+
+\begin{proposition}
+Let $\widetilde{B}_R$ be the tail bound before refinement, and $\widetilde{B}_R'$ the bound after replacing a state $s$ by its children. Then:
+\[
+\widetilde{B}_R' \le \widetilde{B}_R.
+\]
+\end{proposition}
+
+\begin{proof}
+Before refinement, the contribution of state $s$ to the bound is:
+\[
+\sup_{i \in \mathcal{C}(s)} \frac{e^{U(s)}}{\pi(s)\,\underline{q}_s(i)}.
+\]
+
+After refinement, this contribution is replaced by:
+\[
+\max_{s' \in \text{Children}(s)} \sup_{i \in \mathcal{C}(s')} \frac{e^{U(s')}}{\pi(s')\,\underline{q}_{s'}(i)}.
+\]
+
+Since $U(s') \le U(s)$ for all $s'$, and the new states form a partition of $\mathcal{C}(s)$, the maximum over the refined states cannot exceed the original contribution. The bound for other states remains unchanged, so the global bound does not increase.
+\end{proof}
+
+\subsection{Refinement strategy}
+
+A rejection indicates that the bound is loose in the region that generated the sampled alternative, but not all rejections are equally informative. To measure the severity of the mismatch, we associate with each sampled alternative $i \in \mathcal{C}(s)$ a looseness score.
+
+A natural choice is the acceptance ratio itself:
+\[
+a(i) = \frac{g(i)}{c_u q(i)},
+\]
+and the corresponding gap to the bound:
+\[
+\delta(i) = 1 - a(i) = 1 - \frac{g(i)}{c_u q(i)}.
+\]
+
+The quantity $\delta(i)$ belongs to $[0,1]$. Values close to 0 indicate that the bound is locally tight, whereas values close to 1 indicate that the bound is very loose at the sampled alternative.
+
+Instead of refining deterministically after every rejection, we use $\delta(i)$ to define a \emph{probability of refinement}. More precisely, if $i \in \mathcal{C}(s)$ for some $s \in \mathcal{S}_R$, we refine the state $s$ with probability
+\[
+r(i) = \varphi(\delta(i)),
+\]
+where $\varphi : [0,1] \to [0,1]$ is a nondecreasing function.
+
+A simple choice is
+\[
+r(i) = \delta(i),
+\]
+so that states that generate alternatives far from the bound are more likely to be refined. More generally, one may use
+\[
+r(i) = \delta(i)^\gamma,
+\qquad \gamma > 0,
+\]
+to control the aggressiveness of the refinement mechanism.
+
+The resulting adaptive strategy is as follows:
+\begin{itemize}
+\item Draw a candidate $i \sim q$.
+\item If $i \in G$, proceed as usual.
+\item If $i \in \mathcal{C}(s)$ for some $s \in \mathcal{S}_R$, compute $\delta(i)$.
+\item If the draw is rejected, refine $s$ with probability $r(i)$.
+\end{itemize}
+
+This strategy allocates refinement effort smoothly: states that repeatedly produce alternatives far below the bound are refined more often, while states for which the bound is already tight are left unchanged.
+
+\subsection{Effect on the sampling procedure}
+
+Refinement modifies the set $\mathcal{S}_R$, and therefore:
+\begin{itemize}
+\item the tail proposal $q_R$, through the distribution $\pi(s)$,
+\item the bound $\widetilde{B}_R$,
+\item the global constant $c_u$.
+\end{itemize}
+
+As refinement proceeds:
+\begin{itemize}
+\item the partition becomes finer,
+\item the bounds $U(s)$ become tighter,
+\item the acceptance rate increases.
+\end{itemize}
+
+\subsection{Illustration: route choice}
+
+In route choice, a state corresponds to a partial path:
+\[
+s = (n_0, n_1, \dots, n_k),
+\]
+and $\mathcal{C}(s)$ contains all feasible continuations to the destination.
+
+The bound $U(s)$ is typically constructed as:
+\[
+U(s) = V(s) + \overline{V}(n_k),
+\]
+where $\overline{V}(n_k)$ is an upper bound on the remaining utility.
+
+Suppose that a sampled path $i$ generated from $s$ is rejected. This indicates that:
+\begin{itemize}
+\item the continuation chosen from node $n_k$ leads to a low-utility path,
+\item the bound $U(s)$, based on the best possible continuation, is too optimistic for most paths in $\mathcal{C}(s)$.
+\end{itemize}
+
+Refinement consists in expanding $s$ into its children:
+\[
+s' = (n_0, n_1, \dots, n_k, n_{k+1}),
+\]
+for each feasible successor node $n_{k+1}$.
+
+Each child state corresponds to a subset of paths sharing a more specific prefix. The associated bounds:
+\[
+U(s') = V(s') + \overline{V}(n_{k+1}),
+\]
+are typically tighter than $U(s)$.
+
+As a result:
+\begin{itemize}
+\item regions corresponding to poor continuations receive lower bounds,
+\item the variability within each region is reduced,
+\item the global bound $\widetilde{B}_R$ becomes tighter.
+\end{itemize}
+
+This process can be repeated iteratively, yielding a progressively refined partition of the choice set and improving the efficiency of the sampling procedure.
+\end{document}

@@ -1,0 +1,29 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "large_choice_sampling"
+version = "0.1.0"
+description = "Accept-reject sampling from very large implicit choice sets"
+readme = "README.md"
+requires-python = ">=3.11"
+authors = [
+  {name = "Michel Bierlaire"}
+]
+dependencies = []
+
+[project.optional-dependencies]
+dev = [
+  "pytest",
+]
+
+[tool.setuptools]
+package-dir = {"" = "src"}
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+pythonpath = ["src"]
+testpaths = ["tests"]
