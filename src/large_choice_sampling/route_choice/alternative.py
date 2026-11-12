@@ -6,7 +6,7 @@ represented here by the ordered tuple of visited nodes together with its total
 travel time.
 
 Michel Bierlaire
-Wed Mar 25 2026, 17:24:26
+Wed Mar 25 2026, 14:52:33
 
 """
 

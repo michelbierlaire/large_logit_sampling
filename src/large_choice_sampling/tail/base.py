@@ -10,7 +10,7 @@ The interface is designed so that implementations can rely on generative
 procedures rather than explicit enumeration of the choice set.
 
 Michel Bierlaire
-Wed Mar 25 2026, 17:39:49
+Wed Mar 25 2026, 14:52:33
 """
 
 from __future__ import annotations

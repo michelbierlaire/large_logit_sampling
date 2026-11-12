@@ -11,7 +11,7 @@ alternative. This information can be useful for diagnostics or adaptive
 algorithms.
 
 Michel Bierlaire
-Wed Mar 25 2026, 17:17:38
+Wed Mar 25 2026, 14:52:33
 """
 
 from __future__ import annotations

@@ -7,7 +7,7 @@ proposes candidates and accepts them with the standard accept-reject
 probability, producing independent draws from the target distribution.
 
 Michel Bierlaire
-Wed Mar 25 2026, 17:13:17
+Wed Mar 25 2026, 14:52:33
 """
 
 from __future__ import annotations

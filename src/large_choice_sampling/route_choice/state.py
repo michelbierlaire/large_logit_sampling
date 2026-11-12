@@ -14,7 +14,7 @@ These states are used by search procedures (e.g., best-first search) to explore
 large combinatorial choice sets without explicit enumeration.
 
 Michel Bierlaire
-Wed Mar 25 2026, 17:37:57
+Wed Mar 25 2026, 14:52:33
 """
 
 from __future__ import annotations

@@ -6,7 +6,7 @@ utilities to compute the elite bound, the tail bound, and the resulting
 global bound used in the accept-reject algorithm.
 
 Michel Bierlaire
-Wed Mar 25 2026, 17:05:26
+Wed Mar 25 2026, 14:52:33
 """
 
 from __future__ import annotations

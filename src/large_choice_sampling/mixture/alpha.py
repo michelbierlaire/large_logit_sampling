@@ -12,7 +12,7 @@ The parameter alpha controls the trade-off between sampling from the
 elite set and the tail distribution in the mixture proposal.
 
 Michel Bierlaire
-Wed Mar 25 2026, 17:23:28
+Wed Mar 25 2026, 14:52:33
 """
 
 from __future__ import annotations

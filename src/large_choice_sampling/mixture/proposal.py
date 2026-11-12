@@ -12,7 +12,7 @@ The class also provides utilities to sample from the mixture and to evaluate
 proposal probabilities for accepted-reject sampling.
 
 Michel Bierlaire
-Wed Mar 25 2026, 17:23:38
+Wed Mar 25 2026, 14:52:33
 """
 
 from __future__ import annotations

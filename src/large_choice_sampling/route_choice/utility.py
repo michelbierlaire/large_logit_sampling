@@ -5,7 +5,7 @@ The utility is assumed to depend linearly on total travel time, with a
 negative sign to reflect disutility of travel time.
 
 Michel Bierlaire
-Wed Mar 25 2026, 17:37:51
+Wed Mar 25 2026, 14:52:33
 """
 
 from __future__ import annotations

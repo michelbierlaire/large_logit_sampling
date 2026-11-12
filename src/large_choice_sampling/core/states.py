@@ -7,7 +7,7 @@ in the accept-reject construction to describe an unexplored portion of the
 remainder together with its optimistic utility bound.
 
 Michel Bierlaire
-Wed Mar 25 2026, 17:19:30
+Wed Mar 25 2026, 14:52:33
 """
 
 from __future__ import annotations

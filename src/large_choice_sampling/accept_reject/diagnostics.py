@@ -6,7 +6,7 @@ attempted proposals, the number of accepted proposals, and the resulting
 acceptance rate.
 
 Michel Bierlaire
-Wed Mar 25 2026, 17:13:11
+Wed Mar 25 2026, 14:52:33
 """
 
 from __future__ import annotations

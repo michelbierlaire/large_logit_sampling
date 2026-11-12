@@ -6,7 +6,7 @@ helpers used to build optimistic utility bounds and simple probability bounds
 for sequential path generation.
 
 Michel Bierlaire
-Wed Mar 25 2026, 17:25:44
+Wed Mar 25 2026, 14:52:33
 """
 
 from __future__ import annotations

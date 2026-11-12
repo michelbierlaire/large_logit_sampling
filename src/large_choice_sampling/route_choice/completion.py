@@ -7,7 +7,7 @@ step by step until the destination is reached. It also provides a conservative
 lower bound on completion probabilities used in the tail bound construction.
 
 Michel Bierlaire
-Wed Mar 25 2026, 17:30:03
+Wed Mar 25 2026, 14:52:33
 """
 
 from __future__ import annotations

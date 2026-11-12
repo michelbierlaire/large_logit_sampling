@@ -7,7 +7,7 @@ alternatives found, or any other diagnostic maintained by the search
 algorithm.
 
 Michel Bierlaire
-Wed Mar 25 2026, 17:23:21
+Wed Mar 25 2026, 14:52:33
 """
 
 from __future__ import annotations

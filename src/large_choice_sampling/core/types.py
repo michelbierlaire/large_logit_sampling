@@ -12,7 +12,7 @@ types used throughout the large-choice-set sampling framework.
     value.
 
 Michel Bierlaire
-Wed Mar 25 2026, 17:21:20
+Wed Mar 25 2026, 14:52:33
 """
 from __future__ import annotations
 

@@ -13,7 +13,7 @@ These containers are intentionally simple and immutable (where appropriate)
 to facilitate logging, analysis, and reproducibility.
 
 Michel Bierlaire
-Wed Mar 25 2026, 17:18:33
+Wed Mar 25 2026, 14:52:33
 """
 
 from __future__ import annotations

@@ -10,7 +10,7 @@ The class is intentionally lightweight and can be enriched with
 additional attributes depending on the application.
 
 Michel Bierlaire
-Wed Mar 25 2026, 17:13:02
+Wed Mar 25 2026, 14:52:33
 """
 
 from __future__ import annotations
